@@ -1,0 +1,114 @@
+{
+  "direction": "python_backend",
+  "is_synthetic": true,
+  "usage_note": "Учебные наборы ответов, составленные для ручной сверки правил. Это не результаты реальных студентов и не замеры времени. Проценты в expected_result округлены только для отображения; решение определяется точными долями. Порядок вопросов задаётся тестом.",
+  "cases": [
+    {
+      "id": "ready_case",
+      "test_id": "python_backend_full",
+      "purpose": "Успешная ветка: все ответы верны.",
+      "answers": {"bf01": "b", "bf02": "c", "bf03": "a", "bf04": "d", "bf05": "b", "bf06": "c", "bf07": "a", "bf08": "d", "bf09": "b", "bf10": "c", "bf11": "a", "bf12": "d"},
+      "expected_result": {
+        "correct_answers": 12, "total_questions": 12, "overall_percent": 100, "decision": "ready",
+        "skill_scores": {
+          "python": {"correct": 3, "total": 3, "percent": 100},
+          "sql": {"correct": 3, "total": 3, "percent": 100},
+          "git": {"correct": 3, "total": 3, "percent": 100},
+          "rest_api": {"correct": 3, "total": 3, "percent": 100}
+        },
+        "incorrect_question_ids": [], "weak_skills": [], "review_material_ids": [],
+        "explanation": "Оба порога выполнены. Проверены только базовые темы четырёх навыков; это не подтверждение всех требований стажировки."
+      }
+    },
+    {
+      "id": "growth_case",
+      "test_id": "python_backend_full",
+      "purpose": "Ветка с пробелами в SQL и HTTP.",
+      "answers": {"bf01": "b", "bf02": "c", "bf03": "a", "bf04": "a", "bf05": "a", "bf06": "a", "bf07": "a", "bf08": "d", "bf09": "b", "bf10": "a", "bf11": "c", "bf12": "b"},
+      "expected_result": {
+        "correct_answers": 6, "total_questions": 12, "overall_percent": 50, "decision": "growth_needed",
+        "skill_scores": {
+          "python": {"correct": 3, "total": 3, "percent": 100},
+          "sql": {"correct": 0, "total": 3, "percent": 0},
+          "git": {"correct": 3, "total": 3, "percent": 100},
+          "rest_api": {"correct": 0, "total": 3, "percent": 0}
+        },
+        "incorrect_question_ids": ["bf04", "bf05", "bf06", "bf10", "bf11", "bf12"],
+        "weak_skills": ["sql", "rest_api"], "review_material_ids": ["sql_basics", "http_basics"],
+        "explanation": "Не пройдены общий порог и пороги SQL/HTTP. Повторить COUNT, LEFT JOIN, HAVING, 201, application/json и безопасные методы; выполнить упражнения по SQL и HTTP."
+      }
+    },
+    {
+      "id": "sql_ready_at_threshold",
+      "test_id": "python_sql_core",
+      "purpose": "Ровно 70% суммарно и ровно 60% по SQL — успешный результат.",
+      "answers": {"ps01": "c", "ps02": "b", "ps03": "b", "ps04": "c", "ps05": "b", "ps06": "a", "ps07": "a", "ps08": "b", "ps09": "b", "ps10": "b"},
+      "expected_result": {
+        "correct_answers": 7, "total_questions": 10, "overall_percent": 70, "decision": "ready",
+        "skill_scores": {"python": {"correct": 4, "total": 5, "percent": 80}, "sql": {"correct": 3, "total": 5, "percent": 60}},
+        "incorrect_question_ids": ["ps05", "ps09", "ps10"], "weak_skills": [], "review_material_ids": ["python_basics", "sql_basics"],
+        "explanation": "Границы включаются. Ошибки в списковом включении, сортировке и первичном ключе остаются темами повторения даже при успешном результате."
+      }
+    },
+    {
+      "id": "sql_growth_overall_only",
+      "test_id": "python_sql_core",
+      "purpose": "Оба навыка достигли 60%, но общего результата недостаточно.",
+      "answers": {"ps01": "c", "ps02": "b", "ps03": "b", "ps04": "a", "ps05": "b", "ps06": "a", "ps07": "a", "ps08": "b", "ps09": "b", "ps10": "b"},
+      "expected_result": {
+        "correct_answers": 6, "total_questions": 10, "overall_percent": 60, "decision": "growth_needed",
+        "skill_scores": {"python": {"correct": 3, "total": 5, "percent": 60}, "sql": {"correct": 3, "total": 5, "percent": 60}},
+        "incorrect_question_ids": ["ps04", "ps05", "ps09", "ps10"], "weak_skills": [], "review_material_ids": ["python_basics", "sql_basics"],
+        "explanation": "Провален только общий порог 70%. Пустой weak_skills не означает отсутствие ошибок: нужны материалы по исключениям, спискам, сортировке и первичному ключу."
+      }
+    },
+    {
+      "id": "web_ready_at_threshold",
+      "test_id": "python_web_git",
+      "purpose": "Минимальные допустимые целые баллы: Python 3/4, HTTP 2/3, Git 2/3.",
+      "answers": {"wg01": "b", "wg02": "b", "wg03": "c", "wg04": "a", "wg05": "a", "wg06": "b", "wg07": "c", "wg08": "a", "wg09": "b", "wg10": "b"},
+      "expected_result": {
+        "correct_answers": 7, "total_questions": 10, "overall_percent": 70, "decision": "ready",
+        "skill_scores": {"python": {"correct": 3, "total": 4, "percent": 75}, "rest_api": {"correct": 2, "total": 3, "percent": 67}, "git": {"correct": 2, "total": 3, "percent": 67}},
+        "incorrect_question_ids": ["wg04", "wg07", "wg10"], "weak_skills": [], "review_material_ids": ["python_basics", "http_basics", "git_basics"],
+        "explanation": "2/3 — это около 66,67%, порог навыка пройден. Повторить индексирование, PATCH и назначение веток."
+      }
+    },
+    {
+      "id": "web_growth_despite_high_total",
+      "test_id": "python_web_git",
+      "purpose": "80% суммарно не компенсируют недостаточный результат по Git.",
+      "answers": {"wg01": "b", "wg02": "b", "wg03": "c", "wg04": "b", "wg05": "a", "wg06": "b", "wg07": "b", "wg08": "a", "wg09": "a", "wg10": "b"},
+      "expected_result": {
+        "correct_answers": 8, "total_questions": 10, "overall_percent": 80, "decision": "growth_needed",
+        "skill_scores": {"python": {"correct": 4, "total": 4, "percent": 100}, "rest_api": {"correct": 3, "total": 3, "percent": 100}, "git": {"correct": 1, "total": 3, "percent": 33}},
+        "incorrect_question_ids": ["wg09", "wg10"], "weak_skills": ["git"], "review_material_ids": ["git_basics"],
+        "explanation": "Git ниже 60%. Повторить подготовку изменений и назначение веток. Это оценка тем теста, даже если Git был предложен как дополнительная тема."
+      }
+    },
+    {
+      "id": "full_ready_minimum_total",
+      "test_id": "python_backend_full",
+      "purpose": "Для теста из 12 вопросов минимальный общий балл — 9.",
+      "answers": {"bf01": "b", "bf02": "c", "bf03": "a", "bf04": "d", "bf05": "b", "bf06": "a", "bf07": "a", "bf08": "d", "bf09": "a", "bf10": "c", "bf11": "a", "bf12": "a"},
+      "expected_result": {
+        "correct_answers": 9, "total_questions": 12, "overall_percent": 75, "decision": "ready",
+        "skill_scores": {"python": {"correct": 3, "total": 3, "percent": 100}, "sql": {"correct": 2, "total": 3, "percent": 67}, "git": {"correct": 2, "total": 3, "percent": 67}, "rest_api": {"correct": 2, "total": 3, "percent": 67}},
+        "incorrect_question_ids": ["bf06", "bf09", "bf12"], "weak_skills": [], "review_material_ids": ["sql_basics", "git_basics", "http_basics"],
+        "explanation": "9/12 = 75%; каждый навык также выше 60%. Точное значение 70% при 12 равновесных вопросах недостижимо."
+      }
+    },
+    {
+      "id": "full_growth_below_total",
+      "test_id": "python_backend_full",
+      "purpose": "По две верные позиции в каждом навыке ещё не дают общего успеха.",
+      "answers": {"bf01": "b", "bf02": "c", "bf03": "b", "bf04": "d", "bf05": "b", "bf06": "a", "bf07": "a", "bf08": "d", "bf09": "a", "bf10": "c", "bf11": "a", "bf12": "a"},
+      "expected_result": {
+        "correct_answers": 8, "total_questions": 12, "overall_percent": 67, "decision": "growth_needed",
+        "skill_scores": {"python": {"correct": 2, "total": 3, "percent": 67}, "sql": {"correct": 2, "total": 3, "percent": 67}, "git": {"correct": 2, "total": 3, "percent": 67}, "rest_api": {"correct": 2, "total": 3, "percent": 67}},
+        "incorrect_question_ids": ["bf03", "bf06", "bf09", "bf12"], "weak_skills": [], "review_material_ids": ["python_basics", "sql_basics", "git_basics", "http_basics"],
+        "explanation": "8/12 = около 66,67%, что ниже 70%. Причина — общий балл; повторить темы всех четырёх ошибок."
+      }
+    }
+  ]
+}

@@ -1,0 +1,200 @@
+{
+  "direction": "python_backend",
+  "checked_at": "2026-09-24",
+  "usage_note": "Учебная подборка для задания 4: краткие пересказы пяти основных и двух смежных описаний. Дата означает проверку содержания страницы, а не подтверждение открытого набора. Требования, пожелания и задачи работодателя различаются в requirements_paraphrased.",
+  "items": [
+    {
+      "id": "yandex_backend",
+      "company": "Яндекс",
+      "title": "Бэкенд — стажировка",
+      "scope": "core",
+      "is_synthetic": false,
+      "source_status": "official_program_page",
+      "source_url": "https://yandex.ru/yaintern/backend",
+      "source_checked_at": "2026-09-24",
+      "recruitment_status": "not_verified",
+      "summary": "Программа backend-стажировок с выбором языка, включая Python. Основной отбор проверяет программирование и алгоритмы. SQL и HTTP/REST перечислены среди преимуществ.",
+      "requirements_paraphrased": [
+        "Требование: один из поддерживаемых языков; Python — один из вариантов, а не единственный обязательный язык.",
+        "Требование: алгоритмы, структуры данных и оценка сложности.",
+        "Преимущество: базы данных и SQL; сетевые протоколы, в том числе HTTP и REST.",
+        "Преимущество: Unix/Linux, многопоточность, распределённые вычисления и паттерны ООП."
+      ],
+      "canonical_skills": ["python", "sql", "rest_api"],
+      "canonical_skill_evidence": {
+        "python": "Перечень языков направления; в этом примере выбран Python.",
+        "sql": "Раздел о технических интервью: преимущество кандидата.",
+        "rest_api": "Там же: HTTP и REST среди сетевых знаний."
+      },
+      "uncovered_requirements": ["Алгоритмы и оценка сложности", "Unix/Linux", "Сетевые протоколы кроме базового HTTP", "Многопоточность", "Распределённые вычисления", "Паттерны ООП"],
+      "recommended_test_id": "python_backend_full",
+      "additional_test_skills": ["git"],
+      "coverage_note": "Git — дополнительная тема диагностики, не извлечённое требование. Тест не проверяет основной алгоритмический отбор."
+    },
+    {
+      "id": "tbank_python",
+      "company": "Т-Банк / Т-Образование",
+      "title": "Python-разработчик — оплачиваемая стажировка",
+      "scope": "core",
+      "is_synthetic": false,
+      "source_status": "official_program_page",
+      "source_url": "https://education.tbank.ru/start/python/",
+      "source_checked_at": "2026-09-24",
+      "recruitment_status": "not_verified",
+      "summary": "Программа для начинающих Python-разработчиков. В ожиданиях указаны Python, ООП и алгоритмы; SQL, Bash и Docker приведены в дополнительном блоке. Среди прошлых проектов есть backend-сервисы.",
+      "requirements_paraphrased": [
+        "Требование: программировать на Python.",
+        "Требование: принципы ООП, алгоритмы и структуры данных.",
+        "Дополнительный блок ожиданий: простые SQL-запросы, Bash и опыт Docker."
+      ],
+      "canonical_skills": ["python", "sql"],
+      "canonical_skill_evidence": {
+        "python": "Раздел ожиданий от кандидата.",
+        "sql": "Дополнительный блок ожиданий от кандидата."
+      },
+      "uncovered_requirements": ["ООП", "Алгоритмы и структуры данных", "Bash", "Docker"],
+      "recommended_test_id": "python_sql_core",
+      "additional_test_skills": [],
+      "coverage_note": "REST API в примерах прошлых проектов не приравнивается к обязательному входному требованию. Условия текущего набора нужно уточнять отдельно."
+    },
+    {
+      "id": "avito_python",
+      "company": "Авито",
+      "title": "Стажировка для разработчиков (Backend, Python)",
+      "scope": "core",
+      "is_synthetic": false,
+      "source_status": "secondary_listing",
+      "source_url": "https://hireseeker.ru/vacancy/9980496-stazhirovka-dlya-razrabotchikov-backend-python",
+      "source_checked_at": "2026-09-24",
+      "recruitment_status": "not_verified",
+      "summary": "Вторичная публикация описывает Python-направление backend-стажировки: работа с библиотеками, SQL, создание REST CRUD-сервисов и асинхронность.",
+      "requirements_paraphrased": [
+        "Python и использование библиотек в собственных проектах.",
+        "SQL: несколько JOIN, транзакции, ACID и CTE.",
+        "Создание REST CRUD-сервисов на Python.",
+        "Основы асинхронного программирования."
+      ],
+      "canonical_skills": ["python", "sql", "rest_api"],
+      "canonical_skill_evidence": {
+        "python": "Блок требований к Python-направлению.",
+        "sql": "Явно названы SQL и несколько тем запросов.",
+        "rest_api": "Явно названы REST CRUD-сервисы."
+      },
+      "uncovered_requirements": ["Практическая разработка сервисов", "Работа с библиотеками Python", "Транзакции и ACID", "CTE", "Асинхронное программирование"],
+      "recommended_test_id": "python_backend_full",
+      "additional_test_skills": ["git"],
+      "coverage_note": "Проверена конкретная вторичная публикация; первоисточник набора не подтверждён. Git добавлен только как тема общего теста; сложный SQL и создание сервисов не проверяются."
+    },
+    {
+      "id": "caltat_backend",
+      "company": "Caltat",
+      "title": "Стажер/Джуниор Python Back-end",
+      "scope": "core",
+      "is_synthetic": false,
+      "source_status": "secondary_listing",
+      "source_url": "https://youngjunior.ru/python/jobs/32014",
+      "source_checked_at": "2026-09-24",
+      "recruitment_status": "not_verified",
+      "summary": "Вторичная публикация от 22 июня 2026 года: стажёрская/junior-позиция с задачами по REST API, PostgreSQL и Git. Несмотря на название, ожидаются опыт от шести месяцев и уверенный Python.",
+      "requirements_paraphrased": [
+        "Требование: Python, асинхронность и multiprocessing; опыт от шести месяцев.",
+        "Требование: PostgreSQL, реляционные базы данных, JOIN и индексы.",
+        "Требование: Docker/docker-compose и командная строка Linux.",
+        "Задачи: REST API на FastAPI, Pydantic и SQLAlchemy; запросы PostgreSQL; работа с Git."
+      ],
+      "canonical_skills": ["python", "sql", "git", "rest_api"],
+      "canonical_skill_evidence": {
+        "python": "Раздел требований.",
+        "sql": "JOIN в требованиях и запросы PostgreSQL в задачах.",
+        "git": "Работа с Git в перечне задач.",
+        "rest_api": "Создание REST API в перечне задач."
+      },
+      "uncovered_requirements": ["Практический опыт от шести месяцев", "Асинхронность и multiprocessing", "Индексы БД", "Docker", "Linux", "FastAPI, Pydantic и SQLAlchemy", "Развёртывание сервисов"],
+      "recommended_test_id": "python_backend_full",
+      "additional_test_skills": [],
+      "coverage_note": "Пример более высоких ожиданий внутри стажёрского названия. Совпадение четырёх тем не означает полное покрытие требований; первичная вакансия не подтверждена."
+    },
+    {
+      "id": "sber_backend_ai",
+      "company": "Сбер",
+      "title": "Backend-стажёр Python",
+      "scope": "core",
+      "is_synthetic": false,
+      "source_status": "secondary_listing",
+      "source_url": "https://youngjunior.ru/backend/jobs/40523",
+      "source_checked_at": "2026-09-24",
+      "recruitment_status": "not_verified",
+      "summary": "Вторичная публикация от 15 июля 2026 года о backend-сервисах для AI-помощников. Это пример Python/backend с дополнительной специализацией, которую базовый тест не оценивает.",
+      "requirements_paraphrased": [
+        "Python; FastAPI, aiohttp, SQLAlchemy, pandas и bs4.",
+        "SQL и ORM; REST API; Git.",
+        "Асинхронное программирование, ООП и SOLID.",
+        "Студент технического вуза: старшие курсы бакалавриата или магистратура."
+      ],
+      "canonical_skills": ["python", "sql", "git", "rest_api"],
+      "canonical_skill_evidence": {
+        "python": "Явное требование Python.",
+        "sql": "Явное требование SQL и ORM.",
+        "git": "Явное требование работы с Git.",
+        "rest_api": "Явное требование понимания REST API."
+      },
+      "uncovered_requirements": ["FastAPI и aiohttp", "ORM и SQLAlchemy", "pandas и bs4", "Асинхронность", "ООП и SOLID", "Разработка AI-сервисов", "Курс и направление обучения"],
+      "recommended_test_id": "python_backend_full",
+      "additional_test_skills": [],
+      "coverage_note": "Основная роль — backend; AI-специализация остаётся непроверенной. Содержание взято из конкретной вторичной публикации, статус найма не подтверждён."
+    },
+    {
+      "id": "agima_ai",
+      "company": "AGIMA",
+      "title": "Стажер AI-разработчик",
+      "scope": "adjacent_stress_test",
+      "is_synthetic": false,
+      "source_status": "employer_listing_on_job_board",
+      "source_url": "https://career.habr.com/vacancies/1000167929",
+      "source_checked_at": "2026-09-24",
+      "recruitment_status": "not_verified",
+      "summary": "Смежная full-stack/AI-стажировка: изменение сервисов с помощью AI-инструментов, Git, Linux и Docker. Python упомянут вместе с JS/TS.",
+      "requirements_paraphrased": [
+        "Чтение и изменение сервисов на Python / JS / TS.",
+        "Git, Linux и Docker на уровне работы в терминале.",
+        "LLM-инструменты, самостоятельная работа и чтение документации на английском."
+      ],
+      "canonical_skills": ["python", "git"],
+      "canonical_skill_evidence": {
+        "python": "Один из языков в описании работы с сервисами.",
+        "git": "Прямое упоминание среди необходимых инструментов."
+      },
+      "uncovered_requirements": ["Linux", "Docker", "LLM-инструменты", "Frontend/full-stack", "Английский язык"],
+      "recommended_test_id": null,
+      "additional_test_skills": [],
+      "coverage_note": "Контроль границ направления: общие Python и Git не дают оснований назначать backend-тест как оценку этой AI/full-stack-роли. В пять основных описаний не входит."
+    },
+    {
+      "id": "simbirsoft_nlp",
+      "company": "SimbirSoft",
+      "title": "Стажер NLP",
+      "scope": "adjacent_stress_test",
+      "is_synthetic": false,
+      "source_status": "employer_listing_on_job_board",
+      "source_url": "https://career.habr.com/vacancies/1000168626",
+      "source_checked_at": "2026-09-24",
+      "recruitment_status": "not_verified",
+      "summary": "NLP-стажировка с Python, REST API и backend-инструментами. Основная специализация — LLM, RAG и векторный поиск; совпадения базовых навыков недостаточно для оценки этой роли.",
+      "requirements_paraphrased": [
+        "Python: опыт разработки от одного-двух лет.",
+        "LLM, AI-агенты, RAG, векторные БД или embeddings.",
+        "Backend-опыт с FastAPI/Flask; REST API, JSON и асинхронность.",
+        "Плюс: LoRA/PEFT, брокеры сообщений, Docker и профильные pet-проекты."
+      ],
+      "canonical_skills": ["python", "rest_api"],
+      "canonical_skill_evidence": {
+        "python": "Прямое требование опыта разработки.",
+        "rest_api": "Прямое требование REST API и JSON."
+      },
+      "uncovered_requirements": ["Практический опыт разработки", "LLM и RAG", "Векторные БД и embeddings", "FastAPI/Flask", "Асинхронность", "LoRA/PEFT", "Брокеры сообщений", "Docker"],
+      "recommended_test_id": null,
+      "additional_test_skills": [],
+      "coverage_note": "Контроль границ направления. Векторная БД не означает SQL; NLP-позиция не становится backend-позицией из-за Python и REST API. В пять основных описаний не входит."
+    }
+  ]
+}
