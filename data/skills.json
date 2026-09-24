@@ -1,0 +1,45 @@
+{
+  "direction": {
+    "id": "python_backend",
+    "name": "Backend-разработка (Python)",
+    "audience": "Студент 2–4 курса, готовящийся к первой backend-стажировке"
+  },
+  "normalization_note": "Справочник для ручной разметки. Синонимы обозначают тему, а не уровень кандидата. Сначала определяется направление роли. Требования, пожелания и рабочие задачи различаются. Название поисковой выдачи не является доказательством навыка.",
+  "skills": [
+    {
+      "id": "python",
+      "name": "Python",
+      "description": "Базовые коллекции, сравнения, функции, исключения и чтение коротких выражений.",
+      "aliases": ["python", "python 3", "python3", "python-разработка", "python developer", "основы python"],
+      "not_proven_by_test": ["ООП", "Асинхронность", "Алгоритмы и сложность", "Разработка приложений и владение фреймворками"]
+    },
+    {
+      "id": "sql",
+      "name": "SQL",
+      "description": "SELECT, WHERE, JOIN, GROUP BY/HAVING, COUNT, сортировка и первичный ключ.",
+      "aliases": ["sql", "язык sql", "sql-запросы", "запросы sql"],
+      "contextual_terms": ["postgresql", "postgres", "mysql", "реляционные базы данных"],
+      "context_rule": "Относить к SQL при явном требовании запросов или работы с реляционными данными. Название СУБД не подтверждает знание SQL автоматически. Общие слова «базы данных», ORM или векторные БД не считать синонимами SQL.",
+      "not_proven_by_test": ["Транзакции и ACID", "Индексы и оптимизация", "CTE", "Администрирование СУБД", "ORM"]
+    },
+    {
+      "id": "git",
+      "name": "Git",
+      "description": "Состояние файлов, подготовка изменений, коммиты, ветки, конфликты и назначение pull.",
+      "aliases": ["git", "гит", "git status", "git add", "git commit", "git pull"],
+      "contextual_terms": ["github", "gitlab", "контроль версий", "commit", "branch", "merge"],
+      "context_rule": "GitHub/GitLab или ссылка на портфолио сами по себе не являются требованием Git. Нужен контекст работы с репозиторием, ветками или коммитами именно в Git.",
+      "not_proven_by_test": ["Практическое разрешение конфликтов", "Rebase", "CI/CD", "Работа в командном репозитории"]
+    },
+    {
+      "id": "rest_api",
+      "name": "HTTP / REST — основы",
+      "description": "Назначение HTTP-методов, коды 201 и 404, безопасное чтение и JSON.",
+      "aliases": ["http", "https", "rest", "rest api", "restful api", "http api"],
+      "contextual_terms": ["api", "web", "fastapi", "drf", "django rest framework", "aiohttp"],
+      "context_rule": "Общее API или Web не подтверждает REST. Фреймворк подсказывает область, но HTTP/REST отмечается при явном сетевом контексте или прямом требовании. Основы HTTP не подтверждают владение фреймворком и всеми принципами REST.",
+      "not_proven_by_test": ["Архитектурные ограничения REST", "Авторизация", "Разработка и тестирование API", "FastAPI/DRF/aiohttp", "Асинхронность"]
+    }
+  ],
+  "out_of_scope_examples": ["Docker", "Linux", "pytest", "Алгоритмы и структуры данных", "ООП", "ORM", "CI/CD", "Очереди сообщений", "ML/NLP и LLM"]
+}

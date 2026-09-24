@@ -1,0 +1,288 @@
+{
+  "id": "python_web_git",
+  "name": "Python + HTTP/REST + Git",
+  "version": 2,
+  "direction": "python_backend",
+  "expected_duration_min": 8,
+  "duration_status": "estimate_not_measured",
+  "review_status": "pending_human_review",
+  "origin": "Диагностика проекта; текущая редакция подготовлена с помощью ИИ. Не является тестом работодателя. Происхождение описано в docs/CONTENT_PROVENANCE.md.",
+  "covered_skills": [
+    "python",
+    "rest_api",
+    "git"
+  ],
+  "selection_rule": "Для Python/backend-описания с Python и хотя бы одним из Git или HTTP/REST, без подтверждённого SQL. Если подтверждён только один из двух блоков Git/HTTP, второй объявляется дополнительной темой теста, а не требованием вакансии.",
+  "questions": [
+    {
+      "id": "wg01",
+      "skill_id": "python",
+      "type": "single_choice",
+      "difficulty": "basic",
+      "prompt": "Чем == отличается от is?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Ничем"
+        },
+        {
+          "id": "b",
+          "text": "== сравнивает значения, is — идентичность объектов"
+        },
+        {
+          "id": "c",
+          "text": "is только для строк"
+        },
+        {
+          "id": "d",
+          "text": "== только для типов"
+        }
+      ],
+      "correct_option_id": "b",
+      "explanation": "== сравнивает значения, is — идентичность объектов."
+    },
+    {
+      "id": "wg02",
+      "skill_id": "python",
+      "type": "single_choice",
+      "difficulty": "basic",
+      "prompt": "Какой тип хранит уникальные элементы?",
+      "options": [
+        {
+          "id": "a",
+          "text": "list"
+        },
+        {
+          "id": "b",
+          "text": "set"
+        },
+        {
+          "id": "c",
+          "text": "str"
+        },
+        {
+          "id": "d",
+          "text": "tuple"
+        }
+      ],
+      "correct_option_id": "b",
+      "explanation": "set предназначен для уникальных элементов."
+    },
+    {
+      "id": "wg03",
+      "skill_id": "python",
+      "type": "single_choice",
+      "difficulty": "basic",
+      "prompt": "Обычная синхронная функция Python без yield завершилась без исключения и без return со значением. Что вернёт её вызов?",
+      "options": [
+        {
+          "id": "a",
+          "text": "0"
+        },
+        {
+          "id": "b",
+          "text": "False"
+        },
+        {
+          "id": "c",
+          "text": "None"
+        },
+        {
+          "id": "d",
+          "text": "[]"
+        }
+      ],
+      "correct_option_id": "c",
+      "explanation": "Обычная функция при достижении конца тела или при return без значения возвращает None. Генераторы и async-функции в условии исключены."
+    },
+    {
+      "id": "wg04",
+      "skill_id": "python",
+      "type": "single_choice",
+      "difficulty": "basic",
+      "prompt": "Что произойдёт при my_list[10], если элементов только 3?",
+      "options": [
+        {
+          "id": "a",
+          "text": "None"
+        },
+        {
+          "id": "b",
+          "text": "IndexError"
+        },
+        {
+          "id": "c",
+          "text": "Последний элемент"
+        },
+        {
+          "id": "d",
+          "text": "Список расширится"
+        }
+      ],
+      "correct_option_id": "b",
+      "explanation": "Индекс вне диапазона списка вызывает IndexError."
+    },
+    {
+      "id": "wg05",
+      "skill_id": "rest_api",
+      "type": "single_choice",
+      "difficulty": "basic",
+      "prompt": "Какой из перечисленных HTTP-методов предназначен для получения представления ресурса и считается безопасным?",
+      "options": [
+        {
+          "id": "a",
+          "text": "GET"
+        },
+        {
+          "id": "b",
+          "text": "POST"
+        },
+        {
+          "id": "c",
+          "text": "DELETE"
+        },
+        {
+          "id": "d",
+          "text": "PATCH"
+        }
+      ],
+      "correct_option_id": "a",
+      "explanation": "GET запрашивает представление ресурса. Клиент не просит изменить состояние ресурса; служебные побочные эффекты вроде записи в журнал возможны."
+    },
+    {
+      "id": "wg06",
+      "skill_id": "rest_api",
+      "type": "single_choice",
+      "difficulty": "basic",
+      "prompt": "Что обычно означает HTTP 404?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Ресурс создан"
+        },
+        {
+          "id": "b",
+          "text": "Ресурс не найден"
+        },
+        {
+          "id": "c",
+          "text": "Успех без тела"
+        },
+        {
+          "id": "d",
+          "text": "Внутренняя ошибка сервера"
+        }
+      ],
+      "correct_option_id": "b",
+      "explanation": "404 Not Found обычно означает, что ресурс не найден. Код также допускает нежелание сервера раскрывать существование ресурса; внутренней ошибке сервера соответствует 500."
+    },
+    {
+      "id": "wg07",
+      "skill_id": "rest_api",
+      "type": "single_choice",
+      "difficulty": "basic",
+      "prompt": "Какой метод обычно применяют для частичного изменения ресурса?",
+      "options": [
+        {
+          "id": "a",
+          "text": "GET"
+        },
+        {
+          "id": "b",
+          "text": "PATCH"
+        },
+        {
+          "id": "c",
+          "text": "HEAD"
+        },
+        {
+          "id": "d",
+          "text": "OPTIONS"
+        }
+      ],
+      "correct_option_id": "b",
+      "explanation": "PATCH обычно используется для частичного обновления."
+    },
+    {
+      "id": "wg08",
+      "skill_id": "git",
+      "type": "single_choice",
+      "difficulty": "basic",
+      "prompt": "Какая команда показывает состояние working tree и staging area?",
+      "options": [
+        {
+          "id": "a",
+          "text": "git status"
+        },
+        {
+          "id": "b",
+          "text": "git clone"
+        },
+        {
+          "id": "c",
+          "text": "git tag"
+        },
+        {
+          "id": "d",
+          "text": "git log"
+        }
+      ],
+      "correct_option_id": "a",
+      "explanation": "git status показывает текущее состояние файлов."
+    },
+    {
+      "id": "wg09",
+      "skill_id": "git",
+      "type": "single_choice",
+      "difficulty": "basic",
+      "prompt": "Что делает git add перед commit?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Сразу отправляет на GitHub"
+        },
+        {
+          "id": "b",
+          "text": "Добавляет изменения в staging area"
+        },
+        {
+          "id": "c",
+          "text": "Удаляет историю"
+        },
+        {
+          "id": "d",
+          "text": "Создаёт remote"
+        }
+      ],
+      "correct_option_id": "b",
+      "explanation": "git add подготавливает изменения к следующему коммиту."
+    },
+    {
+      "id": "wg10",
+      "skill_id": "git",
+      "type": "single_choice",
+      "difficulty": "basic",
+      "prompt": "Зачем создавать отдельную ветку под задачу?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Изолировать изменения от основной ветки"
+        },
+        {
+          "id": "b",
+          "text": "Отключить историю"
+        },
+        {
+          "id": "c",
+          "text": "Переименовать репозиторий"
+        },
+        {
+          "id": "d",
+          "text": "Удалить main"
+        }
+      ],
+      "correct_option_id": "a",
+      "explanation": "Ветка изолирует изменения до их объединения."
+    }
+  ]
+}

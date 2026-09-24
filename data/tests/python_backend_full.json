@@ -1,0 +1,98 @@
+{
+  "id": "python_backend_full",
+  "name": "Python Backend — базовая диагностика четырёх навыков",
+  "version": 2,
+  "direction": "python_backend",
+  "expected_duration_min": 10,
+  "duration_status": "estimate_not_measured",
+  "review_status": "pending_human_review",
+  "origin": "Диагностика проекта; текущая редакция подготовлена с помощью ИИ. Не является тестом работодателя. Происхождение описано в docs/CONTENT_PROVENANCE.md.",
+  "covered_skills": ["python", "sql", "git", "rest_api"],
+  "selection_rule": "Для Python/backend-описания с Python, SQL и хотя бы одним из Git или HTTP/REST. Если один блок отсутствует в описании, он объявляется дополнительной темой теста, а не требованием вакансии.",
+  "questions": [
+    {
+      "id": "bf01", "skill_id": "python", "type": "single_choice", "difficulty": "basic",
+      "prompt": "Что вернёт len({'a': 1, 'b': 2})?",
+      "options": [{"id": "a", "text": "1"}, {"id": "b", "text": "2"}, {"id": "c", "text": "4"}, {"id": "d", "text": "Ошибка TypeError"}],
+      "correct_option_id": "b",
+      "explanation": "len словаря возвращает число ключей. Здесь два ключа: 'a' и 'b'. Значения отдельно не подсчитываются."
+    },
+    {
+      "id": "bf02", "skill_id": "python", "type": "single_choice", "difficulty": "basic",
+      "prompt": "Как создать кортеж из одного элемента 5?",
+      "options": [{"id": "a", "text": "(5)"}, {"id": "b", "text": "[5]"}, {"id": "c", "text": "(5,)"}, {"id": "d", "text": "{5}"}],
+      "correct_option_id": "c",
+      "explanation": "Кортеж из одного элемента задаётся запятой: (5,). Скобки вокруг 5 без запятой оставляют число; квадратные скобки создают список, фигурные — множество."
+    },
+    {
+      "id": "bf03", "skill_id": "python", "type": "single_choice", "difficulty": "basic",
+      "prompt": "Что проверяет value in my_list, где my_list — обычный список?",
+      "options": [{"id": "a", "text": "Есть ли в списке элемент, соответствующий value"}, {"id": "b", "text": "Совпадает ли тип value с типом списка"}, {"id": "c", "text": "Является ли value допустимым индексом"}, {"id": "d", "text": "Равен ли value длине списка"}],
+      "correct_option_id": "a",
+      "explanation": "in проверяет наличие элемента в коллекции. Это проверка принадлежности, а не допустимости индекса."
+    },
+    {
+      "id": "bf04", "skill_id": "sql", "type": "single_choice", "difficulty": "basic",
+      "prompt": "В users есть столбец email, в том числе с NULL и повторениями. Как посчитать все строки таблицы?",
+      "options": [{"id": "a", "text": "SELECT COUNT(email) FROM users;"}, {"id": "b", "text": "SELECT COUNT(DISTINCT email) FROM users;"}, {"id": "c", "text": "SELECT SUM(1) FROM users WHERE email IS NOT NULL;"}, {"id": "d", "text": "SELECT COUNT(*) FROM users;"}],
+      "correct_option_id": "d",
+      "explanation": "COUNT(*) учитывает все строки. COUNT(email) пропускает NULL, а COUNT(DISTINCT email) дополнительно исключает повторения значений."
+    },
+    {
+      "id": "bf05", "skill_id": "sql", "type": "single_choice", "difficulty": "basic",
+      "prompt": "Нужны все пользователи, включая тех, у кого нет заказов. Какое соединение users слева и orders справа по user_id это обеспечивает без последующего WHERE?",
+      "options": [{"id": "a", "text": "INNER JOIN"}, {"id": "b", "text": "LEFT JOIN"}, {"id": "c", "text": "CROSS JOIN"}, {"id": "d", "text": "RIGHT JOIN"}],
+      "correct_option_id": "b",
+      "explanation": "LEFT JOIN сохраняет пользователей без совпавших заказов и подставляет NULL в поля orders. Дополнительный фильтр по orders в WHERE мог бы исключить такие строки, поэтому в условии его нет."
+    },
+    {
+      "id": "bf06", "skill_id": "sql", "type": "single_choice", "difficulty": "basic",
+      "prompt": "Какое предложение SQL отбирает группы по их COUNT(*) после GROUP BY?",
+      "options": [{"id": "a", "text": "WHERE"}, {"id": "b", "text": "ORDER BY"}, {"id": "c", "text": "HAVING"}, {"id": "d", "text": "LIMIT"}],
+      "correct_option_id": "c",
+      "explanation": "HAVING задаёт условие для сформированных групп. WHERE фильтрует исходные строки, ORDER BY сортирует, LIMIT ограничивает число строк результата."
+    },
+    {
+      "id": "bf07", "skill_id": "git", "type": "single_choice", "difficulty": "basic",
+      "prompt": "Какова основная задача git commit без дополнительных флагов после подготовки изменений через git add?",
+      "options": [{"id": "a", "text": "Создать локальный коммит из подготовленных изменений"}, {"id": "b", "text": "Отправить коммиты в удалённый репозиторий"}, {"id": "c", "text": "Получить изменения из удалённого репозитория"}, {"id": "d", "text": "Включить в коммит все неотслеживаемые файлы без git add"}],
+      "correct_option_id": "a",
+      "explanation": "commit фиксирует подготовленные изменения в локальной истории. Отправка на сервер — отдельная операция push. Неподготовленные файлы автоматически не включаются."
+    },
+    {
+      "id": "bf08", "skill_id": "git", "type": "single_choice", "difficulty": "basic",
+      "prompt": "Что означает конфликт слияния при объединении веток?",
+      "options": [{"id": "a", "text": "Сервер отклонил пароль при push"}, {"id": "b", "text": "Ветка не содержит ни одного коммита"}, {"id": "c", "text": "Все изменения уже успешно объединены"}, {"id": "d", "text": "Git не смог автоматически согласовать часть изменений"}],
+      "correct_option_id": "d",
+      "explanation": "Нужно определить итоговое содержимое конфликтующих файлов, отметить разрешение конфликта и завершить слияние. Конфликт не означает потерю всей истории."
+    },
+    {
+      "id": "bf09", "skill_id": "git", "type": "single_choice", "difficulty": "basic",
+      "prompt": "Какая команда предназначена для получения изменений из удалённого репозитория с последующей интеграцией в текущую ветку?",
+      "options": [{"id": "a", "text": "git fetch"}, {"id": "b", "text": "git pull"}, {"id": "c", "text": "git push"}, {"id": "d", "text": "git status"}],
+      "correct_option_id": "b",
+      "explanation": "pull выполняет получение изменений и их интеграцию выбранным способом. Настройки и состояние веток влияют на результат; операция может остановиться. fetch сам по себе текущую ветку не объединяет."
+    },
+    {
+      "id": "bf10", "skill_id": "rest_api", "type": "single_choice", "difficulty": "basic",
+      "prompt": "Что означает HTTP 201 Created?",
+      "options": [{"id": "a", "text": "Запрос принят, но ещё не выполнен"}, {"id": "b", "text": "Ответ получен без изменения ресурса по условному запросу"}, {"id": "c", "text": "Запрос выполнен и создан один или несколько ресурсов"}, {"id": "d", "text": "Запрос отклонён из-за конфликта состояния"}],
+      "correct_option_id": "c",
+      "explanation": "201 сообщает об успешном создании ресурса или ресурсов. Принятие запроса без завершения обработки соответствует 202, конфликт — 409."
+    },
+    {
+      "id": "bf11", "skill_id": "rest_api", "type": "single_choice", "difficulty": "basic",
+      "prompt": "Какой Content-Type указывает, что тело HTTP-сообщения содержит JSON?",
+      "options": [{"id": "a", "text": "application/json"}, {"id": "b", "text": "text/html"}, {"id": "c", "text": "application/xml"}, {"id": "d", "text": "multipart/form-data"}],
+      "correct_option_id": "a",
+      "explanation": "Тип application/json обозначает JSON. REST сам по себе не требует только JSON: здесь спрашивается конкретный формат тела сообщения."
+    },
+    {
+      "id": "bf12", "skill_id": "rest_api", "type": "single_choice", "difficulty": "basic",
+      "prompt": "Почему действие удаления ресурса нельзя назначать на GET в API, соблюдающем семантику HTTP?",
+      "options": [{"id": "a", "text": "GET нельзя использовать с параметрами URL"}, {"id": "b", "text": "GET разрешён только для HTML"}, {"id": "c", "text": "GET всегда требует аутентификации"}, {"id": "d", "text": "GET предназначен для безопасного чтения, а удаление изменяет ресурс по запросу клиента"}],
+      "correct_option_id": "d",
+      "explanation": "Безопасный метод не должен запрашивать удаление или изменение ресурса. Служебные эффекты вроде журналирования допустимы; они не равнозначны действию удаления."
+    }
+  ]
+}

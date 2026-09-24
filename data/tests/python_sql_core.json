@@ -1,0 +1,287 @@
+{
+  "id": "python_sql_core",
+  "name": "Python + SQL — базовая диагностика",
+  "version": 2,
+  "direction": "python_backend",
+  "expected_duration_min": 8,
+  "duration_status": "estimate_not_measured",
+  "review_status": "pending_human_review",
+  "origin": "Диагностика проекта; текущая редакция подготовлена с помощью ИИ. Не является тестом работодателя. Происхождение описано в docs/CONTENT_PROVENANCE.md.",
+  "covered_skills": [
+    "python",
+    "sql"
+  ],
+  "selection_rule": "Для Python/backend-описания с подтверждёнными Python и SQL, без подтверждённых Git и HTTP/REST. Пожелания можно учитывать, сохраняя их статус. При одном Python подходящего теста нет.",
+  "questions": [
+    {
+      "id": "ps01",
+      "skill_id": "python",
+      "type": "single_choice",
+      "difficulty": "basic",
+      "prompt": "Какой объект Python можно изменять после создания?",
+      "options": [
+        {
+          "id": "a",
+          "text": "tuple"
+        },
+        {
+          "id": "b",
+          "text": "str"
+        },
+        {
+          "id": "c",
+          "text": "list"
+        },
+        {
+          "id": "d",
+          "text": "int"
+        }
+      ],
+      "correct_option_id": "c",
+      "explanation": "У list можно менять состав элементов. str и int неизменяемы; у tuple нельзя заменить его элементы, хотя сам tuple может содержать изменяемый объект."
+    },
+    {
+      "id": "ps02",
+      "skill_id": "python",
+      "type": "single_choice",
+      "difficulty": "basic",
+      "prompt": "Что вернёт list(range(3))?",
+      "options": [
+        {
+          "id": "a",
+          "text": "[1, 2, 3]"
+        },
+        {
+          "id": "b",
+          "text": "[0, 1, 2]"
+        },
+        {
+          "id": "c",
+          "text": "[0, 1, 2, 3]"
+        },
+        {
+          "id": "d",
+          "text": "[3]"
+        }
+      ],
+      "correct_option_id": "b",
+      "explanation": "range(3) даёт 0, 1, 2; верхняя граница не включается."
+    },
+    {
+      "id": "ps03",
+      "skill_id": "python",
+      "type": "single_choice",
+      "difficulty": "basic",
+      "prompt": "data — обычный словарь Python. Зачем использовать data.get('key'), если ключ может отсутствовать?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Удалить ключ"
+        },
+        {
+          "id": "b",
+          "text": "Не получить KeyError, если ключа нет"
+        },
+        {
+          "id": "c",
+          "text": "Отсортировать словарь"
+        },
+        {
+          "id": "d",
+          "text": "Преобразовать ключ"
+        }
+      ],
+      "correct_option_id": "b",
+      "explanation": "dict.get возвращает значение существующего ключа или значение по умолчанию. Здесь это None. Отсутствующий ключ не вызывает KeyError; обращение через квадратные скобки вызовет его."
+    },
+    {
+      "id": "ps04",
+      "skill_id": "python",
+      "type": "single_choice",
+      "difficulty": "basic",
+      "prompt": "Какая конструкция обрабатывает исключения?",
+      "options": [
+        {
+          "id": "a",
+          "text": "if/else"
+        },
+        {
+          "id": "b",
+          "text": "for/while"
+        },
+        {
+          "id": "c",
+          "text": "try/except"
+        },
+        {
+          "id": "d",
+          "text": "match/case"
+        }
+      ],
+      "correct_option_id": "c",
+      "explanation": "Для перехвата исключений используется try/except."
+    },
+    {
+      "id": "ps05",
+      "skill_id": "python",
+      "type": "single_choice",
+      "difficulty": "basic",
+      "prompt": "Что делает [x * 2 for x in [1, 2, 3]]?",
+      "options": [
+        {
+          "id": "a",
+          "text": "[2, 4, 6]"
+        },
+        {
+          "id": "b",
+          "text": "[1, 2, 3, 1, 2, 3]"
+        },
+        {
+          "id": "c",
+          "text": "[1, 4, 9]"
+        },
+        {
+          "id": "d",
+          "text": "Ошибка"
+        }
+      ],
+      "correct_option_id": "a",
+      "explanation": "List comprehension применяет x * 2 к каждому элементу."
+    },
+    {
+      "id": "ps06",
+      "skill_id": "sql",
+      "type": "single_choice",
+      "difficulty": "basic",
+      "prompt": "Какой оператор читает строки из таблицы?",
+      "options": [
+        {
+          "id": "a",
+          "text": "SELECT"
+        },
+        {
+          "id": "b",
+          "text": "UPDATE"
+        },
+        {
+          "id": "c",
+          "text": "DELETE"
+        },
+        {
+          "id": "d",
+          "text": "ALTER"
+        }
+      ],
+      "correct_option_id": "a",
+      "explanation": "SELECT используется для выборки данных."
+    },
+    {
+      "id": "ps07",
+      "skill_id": "sql",
+      "type": "single_choice",
+      "difficulty": "basic",
+      "prompt": "Что делает INNER JOIN?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Возвращает строки, совпавшие по условию"
+        },
+        {
+          "id": "b",
+          "text": "Всегда все строки слева"
+        },
+        {
+          "id": "c",
+          "text": "Удаляет дубликаты"
+        },
+        {
+          "id": "d",
+          "text": "Добавляет колонку"
+        }
+      ],
+      "correct_option_id": "a",
+      "explanation": "INNER JOIN оставляет совпавшие по условию сочетания строк."
+    },
+    {
+      "id": "ps08",
+      "skill_id": "sql",
+      "type": "single_choice",
+      "difficulty": "basic",
+      "prompt": "Что фильтрует строки до GROUP BY?",
+      "options": [
+        {
+          "id": "a",
+          "text": "HAVING"
+        },
+        {
+          "id": "b",
+          "text": "WHERE"
+        },
+        {
+          "id": "c",
+          "text": "ORDER BY"
+        },
+        {
+          "id": "d",
+          "text": "LIMIT"
+        }
+      ],
+      "correct_option_id": "b",
+      "explanation": "WHERE применяется до группировки; HAVING — после."
+    },
+    {
+      "id": "ps09",
+      "skill_id": "sql",
+      "type": "single_choice",
+      "difficulty": "basic",
+      "prompt": "Как отсортировать salary по убыванию?",
+      "options": [
+        {
+          "id": "a",
+          "text": "ORDER BY salary DESC"
+        },
+        {
+          "id": "b",
+          "text": "ORDER BY salary ASC"
+        },
+        {
+          "id": "c",
+          "text": "GROUP BY salary DESC"
+        },
+        {
+          "id": "d",
+          "text": "SORT salary DOWN"
+        }
+      ],
+      "correct_option_id": "a",
+      "explanation": "DESC задаёт сортировку по убыванию."
+    },
+    {
+      "id": "ps10",
+      "skill_id": "sql",
+      "type": "single_choice",
+      "difficulty": "basic",
+      "prompt": "Для чего нужен PRIMARY KEY?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Уникально идентифицировать строку"
+        },
+        {
+          "id": "b",
+          "text": "Только сортировать"
+        },
+        {
+          "id": "c",
+          "text": "Хранить пароли"
+        },
+        {
+          "id": "d",
+          "text": "Автоматически JOIN все таблицы"
+        }
+      ],
+      "correct_option_id": "a",
+      "explanation": "Первичный ключ однозначно идентифицирует строку: его значение уникально и не может быть NULL. Он может состоять из нескольких столбцов."
+    }
+  ]
+}

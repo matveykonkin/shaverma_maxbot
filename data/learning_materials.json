@@ -1,0 +1,187 @@
+{
+  "direction": "python_backend",
+  "checked_at": "2026-09-24",
+  "usage_note": "Ссылки на первичную документацию для сверки ответов и самостоятельного повторения. Пояснения и упражнения подготовлены для проекта; тексты документации не скопированы. question_ids связывает каждый из 32 вопросов с нужным разделом. Практика описана словами, без реализации решений.",
+  "items": [
+    {
+      "id": "python_basics",
+      "skill_id": "python",
+      "title": "Python — коллекции, функции и ошибки",
+      "short_explanation": "Список допускает изменение элементов; кортеж — нет. Множество хранит уникальные элементы, словарь связывает ключи со значениями. Сравнение значений отличается от проверки идентичности объектов. Отсутствующий ключ и неверный индекс — разные ошибки.",
+      "links": [
+        {
+          "label": "Python: списки, включения, кортежи, множества и словари",
+          "url": "https://docs.python.org/3/tutorial/datastructures.html",
+          "read_sections": "5.1, 5.1.3, 5.3–5.5",
+          "question_ids": ["ps01", "ps05", "wg02", "bf01", "bf02", "bf03"]
+        },
+        {
+          "label": "Python: range и определение функций",
+          "url": "https://docs.python.org/3/tutorial/controlflow.html",
+          "read_sections": "4.3 The range() Function и 4.8 Defining Functions",
+          "question_ids": ["ps02", "wg03"]
+        },
+        {
+          "label": "Python: встроенные типы, сравнения, dict.get и индексирование",
+          "url": "https://docs.python.org/3/builtins/stdtypes.html",
+          "read_sections": "Comparisons; Common Sequence Operations; Mapping Types — dict, get",
+          "question_ids": ["ps03", "wg01", "wg04"]
+        },
+        {
+          "label": "Python: обработка исключений",
+          "url": "https://docs.python.org/3/tutorial/errors.html",
+          "read_sections": "8.2–8.3",
+          "question_ids": ["ps04"]
+        }
+      ],
+      "practice": [
+        {
+          "id": "python_practice_1",
+          "task": "Из списка чисел оставь уникальные чётные значения в порядке первого появления. Сначала опиши решение словами.",
+          "input": "[3, 2, 2, 4, 1, 4, 0]",
+          "expected_result": "[2, 4, 0]; для пустого списка — [].",
+          "self_check": "Нет повторов и нечётных чисел; исходный порядок сохранён; исходный список не изменён."
+        },
+        {
+          "id": "python_practice_2",
+          "task": "Объясни, как прочитать ключ со значением по умолчанию «нет данных». Разбери отдельно отсутствие ключа и существующий ключ со значением None.",
+          "input": "Словарь с ключом name и значением None; отдельно пустой словарь.",
+          "expected_result": "В первом случае чтение name через get вернёт None, во втором — заданное значение по умолчанию.",
+          "self_check": "Не путать отсутствующий ключ с существующим значением None; объяснить, когда обращение через квадратные скобки вызовет KeyError."
+        }
+      ]
+    },
+    {
+      "id": "sql_basics",
+      "skill_id": "sql",
+      "title": "SQL — строки, соединения и группы",
+      "short_explanation": "SELECT получает данные, WHERE фильтрует строки, HAVING — группы. LEFT JOIN сохраняет строки слева без пары справа. COUNT(*) считает строки, COUNT(столбец) пропускает NULL. Первичный ключ уникален и не допускает NULL.",
+      "links": [
+        {
+          "label": "PostgreSQL: FROM, JOIN, WHERE, GROUP BY и HAVING",
+          "url": "https://www.postgresql.org/docs/current/queries-table-expressions.html",
+          "read_sections": "7.2.1.1, 7.2.2 и 7.2.3",
+          "question_ids": ["ps06", "ps07", "ps08", "bf05", "bf06"]
+        },
+        {
+          "label": "PostgreSQL: ORDER BY",
+          "url": "https://www.postgresql.org/docs/current/queries-order.html",
+          "read_sections": "7.5",
+          "question_ids": ["ps09"]
+        },
+        {
+          "label": "PostgreSQL: первичные ключи",
+          "url": "https://www.postgresql.org/docs/current/ddl-constraints.html",
+          "read_sections": "5.5.4 Primary Keys",
+          "question_ids": ["ps10"]
+        },
+        {
+          "label": "PostgreSQL: COUNT и SUM",
+          "url": "https://www.postgresql.org/docs/current/functions-aggregate.html",
+          "read_sections": "9.21: count, sum и результат для пустого набора",
+          "question_ids": ["bf04"]
+        }
+      ],
+      "practice": [
+        {
+          "id": "sql_practice_1",
+          "task": "По таблицам users(id, name) и orders(id, user_id, amount) составь на бумаге результат: каждый пользователь и сумма его заказов; без заказов — 0. Поясни выбор соединения и обработку отсутствующих сумм.",
+          "input": "users: (1, Аня), (2, Борис), (3, Вера). orders: (11, 1, 100), (12, 1, 50), (13, 3, 20). Все суммы заданы, возвратов нет.",
+          "expected_result": "Аня — 150; Борис — 0; Вера — 20.",
+          "self_check": "Сохранены все три пользователя. Соединение — LEFT JOIN; группировка по пользователю; отсутствие суммы заменяется на 0."
+        },
+        {
+          "id": "sql_practice_2",
+          "task": "Для orders(id, user_id) выбери пользователей с более чем тремя заказами. Объясни, почему условие по количеству относится к HAVING.",
+          "input": "Пары (id, user_id): (1, 10), (2, 10), (3, 10), (4, 10), (5, 20), (6, 20), (7, 20).",
+          "expected_result": "Только user_id = 10: у него 4 заказа. user_id = 20 с тремя заказами не проходит условие.",
+          "self_check": "Сначала сгруппированы строки по user_id, затем сравнивается COUNT(*) с 3; граница «более трёх» не включает ровно три."
+        }
+      ]
+    },
+    {
+      "id": "git_basics",
+      "skill_id": "git",
+      "title": "Git — файлы, коммиты и ветки",
+      "short_explanation": "Рабочая копия содержит текущие файлы, индекс — подготовленные изменения. Коммит фиксирует индекс локально. Ветка позволяет вести отдельную линию изменений. Получение удалённых коммитов и их объединение — разные действия.",
+      "links": [
+        {
+          "label": "Pro Git: запись изменений в репозиторий",
+          "url": "https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository",
+          "read_sections": "Checking the Status; Staging Modified Files; Committing Your Changes",
+          "question_ids": ["wg08", "wg09", "bf07"]
+        },
+        {
+          "label": "Pro Git: ветвление и слияние",
+          "url": "https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging",
+          "read_sections": "Basic Branching; Basic Merge Conflicts",
+          "question_ids": ["wg10", "bf08"]
+        },
+        {
+          "label": "Git: назначение pull",
+          "url": "https://git-scm.com/docs/git-pull",
+          "read_sections": "DESCRIPTION",
+          "question_ids": ["bf09"]
+        }
+      ],
+      "practice": [
+        {
+          "id": "git_practice_1",
+          "task": "Файл изменили, подготовили через add, затем снова отредактировали. Объясни, какая версия попадёт в обычный commit без дополнительных действий.",
+          "input": "Было A; перед add стало B; после add в рабочем файле стало C.",
+          "expected_result": "В коммит попадёт B; изменение до C останется неподготовленным в рабочей копии.",
+          "self_check": "Различаются рабочая копия, индекс и история. Для включения C нужна новая подготовка изменений."
+        },
+        {
+          "id": "git_practice_2",
+          "task": "Две ветки по-разному изменили одну строку. Опиши действия при конфликте и объясни отличие fetch от pull.",
+          "input": "Нужно сохранить согласованный с командой итоговый текст и завершить слияние.",
+          "expected_result": "Изучить обе версии, выбрать итоговый текст, убрать маркеры конфликта, подготовить файл и завершить слияние. fetch получает изменения; pull также пытается интегрировать их.",
+          "self_check": "Не считать конфликт успешным объединением и не обещать, что pull всегда завершится без вмешательства."
+        }
+      ]
+    },
+    {
+      "id": "http_basics",
+      "skill_id": "rest_api",
+      "title": "HTTP — методы, статусы и формат тела",
+      "short_explanation": "Метод описывает действие запроса, статус — результат обработки, Content-Type — формат тела. Безопасное чтение не должно запрашивать изменение ресурса. JSON — один из форматов представления данных, а не обязательный признак любого REST API.",
+      "links": [
+        {
+          "label": "RFC 9110: семантика HTTP",
+          "url": "https://www.rfc-editor.org/rfc/rfc9110.html",
+          "read_sections": "9.2.1 Safe Methods; 9.3.1 GET; 15.3.2 201 Created; 15.5.5 404 Not Found",
+          "question_ids": ["wg05", "wg06", "bf10", "bf12"]
+        },
+        {
+          "label": "RFC 5789: PATCH",
+          "url": "https://www.rfc-editor.org/rfc/rfc5789.html",
+          "read_sections": "2. The PATCH Method",
+          "question_ids": ["wg07"]
+        },
+        {
+          "label": "RFC 8259: JSON и application/json",
+          "url": "https://www.rfc-editor.org/rfc/rfc8259.html",
+          "read_sections": "1. Introduction; 11. IANA Considerations",
+          "question_ids": ["bf11"]
+        }
+      ],
+      "practice": [
+        {
+          "id": "http_practice_1",
+          "task": "На бумаге подбери методы для чтения, создания, частичного изменения и удаления задачи. Тело данных — JSON. Реализовывать сервер не требуется.",
+          "input": "Коллекция /tasks и существующая задача /tasks/7.",
+          "expected_result": "Чтение — GET; создание в коллекции — POST; частичное изменение — PATCH; удаление — DELETE. Для JSON-тела указывается application/json.",
+          "self_check": "Удаление не назначено на GET. Метод, адрес ресурса и формат тела не перепутаны."
+        },
+        {
+          "id": "http_practice_2",
+          "task": "Сервис успешно создал задачу. Следующий запрос читает отсутствующую задачу. Третий содержит синтаксически повреждённый JSON. Назови подходящие статусы и поясни каждый.",
+          "input": "Нет проблем с аутентификацией; во втором случае сервер не скрывает существование ресурса.",
+          "expected_result": "Создание — 201; отсутствующий ресурс — 404; некорректный синтаксис запроса — 400. Политика проверки полей корректного JSON рассматривается отдельно.",
+          "self_check": "201 не перепутан с 202; 404 — с 500; не приравнивать любую ошибку данных к одному универсальному статусу."
+        }
+      ]
+    }
+  ]
+}
