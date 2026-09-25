@@ -1,18 +1,31 @@
-def build_feedback(wrong_ids: List[str], questions: List[Dict]) -> str:
+def build_feedback(wrong_ids: List[str], questions: List[Dict], user_answers: List[Dict]) -> str:
     """
-    Собирает понятный текст обратной связи.
-    Использует поля 'explanation' из вопросов, которые были в JSON-тесте.
+    Формирует подробный фидбэк: вопрос -> ответ пользователя -> правильный ответ -> объяснение.
     """
     q_map = {q["id"]: q for q in questions}
     
-    feedback_lines = ["**Вот что нужно повторить:**\n"]
+    answers_map = {ans["question_id"]: ans for ans in user_answers}
+    
+    feedback_lines = ["Вот что нужно повторить:\n"]
     
     for q_id in wrong_ids:
-        q = q_map.get(q_id)
-        if not q:
+        question = q_map.get(q_id)
+        user_ans = answers_map.get(q_id)
+        
+        if not question or not user_ans:
             continue
-        feedback_lines.append(f"*   **Вопрос:** {q['prompt']}")
-        feedback_lines.append(f"*   *Почему это так:* {q.get('explanation', 'Обратитесь к учебнику')}")
-        feedback_lines.append("")
+            
+        correct_option = next(
+            (opt for opt in question["options"] 
+             if opt["id"] == question["correct_option_id"]),
+            None
+        )
+        correct_text = correct_option["text"] if correct_option else "Unknown correct answer"
+        
+        feedback_lines.append(f"   Вопрос: {question['prompt']}")
+        feedback_lines.append(f"       Твой ответ: {user_ans['selected_option_text']}")
+        feedback_lines.append(f"       Правильный ответ: {correct_text}")
+        feedback_lines.append(f"       Почему это так: {question.get('explanation', 'Обратитесь к учебнику')}")
+        feedback_lines.append("") # Пустая строка для читаемости
         
     return "\n".join(feedback_lines)
