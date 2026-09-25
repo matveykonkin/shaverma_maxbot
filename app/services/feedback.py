@@ -1,8 +1,13 @@
+from typing import Dict, List
+
+
 def build_feedback(wrong_ids: List[str], questions: List[Dict]) -> str:
     """
     Собирает понятный текст обратной связи.
     Использует поля 'explanation' из вопросов, которые были в JSON-тесте.
     """
+    if not wrong_ids:
+        return "Все ответы верны. Результат относится только к проверенным темам."
     q_map = {q["id"]: q for q in questions}
     
     feedback_lines = ["**Вот что нужно повторить:**\n"]
