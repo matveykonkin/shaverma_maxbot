@@ -2,6 +2,8 @@ def build_feedback(wrong_ids: List[str], questions: List[Dict], user_answers: Li
     """
     Формирует подробный фидбэк: вопрос -> ответ пользователя -> правильный ответ -> объяснение.
     """
+    if not wrong_ids:
+        return "Все ответы верны. Результат относится только к проверенным темам."
     q_map = {q["id"]: q for q in questions}
     
     answers_map = {ans["question_id"]: ans for ans in user_answers}

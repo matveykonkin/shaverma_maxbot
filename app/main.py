@@ -1,8 +1,6 @@
-"""
-MAX-бот для проверки готовности к стажировкам.
-Использует rule-based анализатор и тест-движок.
-"""
+"""MAX-бот: существующий цикл polling, сессии и сервисы диагностики."""
 
+import logging
 import os
 import sys
 import time
@@ -15,9 +13,13 @@ from dotenv import load_dotenv
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from app.parsing import (
+    UserInputError, normalize_text, parse_option, unsupported_direction,
+    valid_user_id, validate_description,
+)
 from app.services.analyzer import extract_skills
-from app.services.test_engine import select_test_questions
-from app.services.scoring import calculate_score
+from app.services.test_engine import select_test_questions, validate_questions
+from app.services.scoring import calculate_score, validate_answers
 from app.services.feedback import build_feedback
 from app.database import (
     save_test_session, get_test_session, clear_test_session,
@@ -38,68 +40,116 @@ SKILLS_LIST_TEXT = ", ".join(AVAILABLE_SKILLS[:-1]) + " и " + AVAILABLE_SKILLS[
 
 BASE_URL = os.getenv("BASE_URL", "https://platform-api2.max.ru")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+HEADERS = {"Authorization": BOT_TOKEN}
+log = logging.getLogger(__name__)
 
-if not BOT_TOKEN:
-    raise RuntimeError("BOT_TOKEN не найден в .env")
-
-HEADERS = {
-    "Authorization": BOT_TOKEN,
-}
-
-# Простое хранилище состояния в памяти
+# Сохраняем принятую архитектуру: один процесс, последовательный polling, память.
 user_sessions = {}
+_processed_messages = OrderedDict()
+_send_times = OrderedDict()
+MAX_CACHED_MESSAGES = 2000
+YES = {"да", "начать", "начать тест", "готов", "готова", "yes"}
+NO = {"нет", "не сейчас", "позже", "no"}
+HELP = (
+    "Пришли текст Python/backend-стажировки с требованиями. "
+    "После подбора теста напиши «да». В тесте отвечай одной латинской буквой или номером варианта.\n"
+    "/start — начало; /help — помощь; /continue — текущий шаг; "
+    "/restart — пройти выбранный тест заново; /cancel — отменить; /result — последний результат."
+)
 
 
 def get_updates(marker=None):
-    params = {
-        "timeout": 30,
-        "types": "message_created",
-    }
-
+    params = {"timeout": 30, "types": "message_created"}
     if marker is not None:
         params["marker"] = marker
-
-    response = requests.get(
-        f"{BASE_URL}/updates",
-        headers=HEADERS,
-        params=params,
-        timeout=40,
-    )
-
+    response = requests.get(f"{BASE_URL}/updates", headers=HEADERS, params=params, timeout=40)
     response.raise_for_status()
-    return response.json()
+    data = response.json()
+    if not isinstance(data, dict) or not isinstance(data.get("updates"), list):
+        raise ValueError("Некорректный ответ сервиса обновлений")
+    new_marker = data.get("marker", marker)
+    if new_marker is not None and (type(new_marker) is not int or new_marker < 0):
+        raise ValueError("Некорректный маркер обновлений")
+    return {"updates": data["updates"], "marker": new_marker}
 
 
 def send_message(user_id, text):
+    if not valid_user_id(user_id) or not isinstance(text, str) or not text.strip() or len(text) > 4000:
+        raise ValueError("Некорректное исходящее сообщение")
+    delay = 0.55 - (time.monotonic() - _send_times.get(user_id, float("-inf")))
+    if delay > 0:
+        time.sleep(delay)
+    _send_times[user_id] = time.monotonic()
+    _send_times.move_to_end(user_id)
+    if len(_send_times) > MAX_CACHED_MESSAGES:
+        _send_times.popitem(last=False)
     response = requests.post(
-        f"{BASE_URL}/messages",
-        headers=HEADERS,
-        params={"user_id": user_id},
-        json={"text": text},
-        timeout=10,
+        f"{BASE_URL}/messages", headers=HEADERS, params={"user_id": user_id},
+        json={"text": text}, timeout=10,
     )
-
     response.raise_for_status()
     return response
 
 
+def _question_text(session):
+    questions = session["test_data"]["questions"]
+    index = session["current_question"]
+    question = questions[index]
+    options = "\n".join(f"{i}. {option['id']}: {option['text']}"
+                        for i, option in enumerate(question["options"], 1))
+    return f"Вопрос {index + 1}/{len(questions)}\n{question['prompt']}\n\n{options}"
+
+
+def _validate_session(session):
+    if not isinstance(session, dict) or session.get("stage") not in {
+        "awaiting_confirmation", "in_progress", "restart_confirmation", "completed"
+    }:
+        raise ValueError("Некорректное состояние сессии")
+    questions = session["test_data"]["questions"]
+    validate_questions(questions)
+    index = session.get("current_question")
+    if type(index) is not int or not 0 <= index <= len(questions):
+        raise ValueError("Некорректная позиция в тесте")
+    validate_answers(session.get("answers"), questions, complete=False)
+    if [a["question_id"] for a in session["answers"]] != [q["id"] for q in questions[:index]]:
+        raise ValueError("Нарушен порядок ответов")
+    if session["stage"] == "in_progress" and index == len(questions):
+        raise ValueError("Нет текущего вопроса")
+    if session["stage"] == "awaiting_confirmation" and index != 0:
+        raise ValueError("Тест начат без подтверждения")
+    if session["stage"] == "completed" and (
+        index != len(questions) or not isinstance(session.get("result_text"), str)
+    ):
+        raise ValueError("Неполный результат")
+    if session["stage"] == "restart_confirmation" and session.get("previous_stage") not in {
+        "awaiting_confirmation", "in_progress", "completed"
+    }:
+        raise ValueError("Неизвестен предыдущий этап")
+
+
+def _current_step(session):
+    if session["stage"] == "in_progress":
+        return _question_text(session)
+    if session["stage"] == "awaiting_confirmation":
+        return "Тест подготовлен. Напиши «да», чтобы начать, или «не сейчас»."
+    if session["stage"] == "restart_confirmation":
+        return "Начать выбранный тест заново и очистить его ответы? Напиши «да» или «нет»."
+    return session["result_text"]
+
+
 def analyze_internship(user_id: int, text: str) -> str:
-    """Анализирует описание стажировки и возвращает результат."""
+    if not valid_user_id(user_id):
+        raise UserInputError("Не удалось определить пользователя.")
+    text = validate_description(text)
+    if unsupported_direction(text):
+        return "Пока поддерживается Python/backend. Пришли описание стажировки этого направления."
     skills = extract_skills(text)
-    
     if not skills:
-        return (
-            "Не нашёл в описании поддерживаемых навыков (Python, SQL, Git, HTTP). "
-            "Пожалуйста, убедитесь, что текст содержит технические требования."
-        )
-    
-    # Формируем ответ о найденных навыках
-    skills_text = ", ".join([f"{s['name']}" for s in skills])
-    skill_ids = [s["id"] for s in skills]
-    
-    # Подбираем тест
+        return "Не нашёл поддерживаемых навыков. Пришли описание с требованиями по Python, SQL, Git или HTTP/REST."
+    skill_ids = [skill["id"] for skill in skills]
+    if "python" not in skill_ids:
+        return "Не найдено требование Python. Сейчас поддерживаются только Python/backend-стажировки."
     test_data = select_test_questions(skill_ids)
-    
     if "error" in test_data:
         return f"К сожалению, по навыкам ({skills_text}) нет готового теста."
     
@@ -121,8 +171,6 @@ def analyze_internship(user_id: int, text: str) -> str:
         f"(вопросов: {len(test_data['questions'])}).\n\n"
         "Готов пройти тест?"
     )
-    
-    return msg
 
 
 def process_user_message(user_id: int, text: str) -> str:
@@ -321,40 +369,37 @@ def restart_command(user_id: int) -> str:
 
 
 def main():
-    print("MAX-бот для проверки стажировок запущен!")
-
+    if not BOT_TOKEN:
+        raise RuntimeError("BOT_TOKEN не найден в .env")
+    logging.basicConfig(level=logging.INFO)
+    log.info("MAX-бот запущен")
     marker = None
-
+    pending = None
     while True:
         try:
-            data = get_updates(marker)
-
-            marker = data.get("marker")
-
-            for update in data.get("updates", []):
-                if update.get("update_type") != "message_created":
-                    continue
-
-                message = update.get("message", {})
-                sender = message.get("sender", {})
-
-                user_id = sender.get("user_id")
-                text = message.get("body", {}).get("text", "")
-
-                if user_id is None:
-                    continue
-
-                print(f"Получено сообщение от {user_id}: {text[:50]}...")
-
-                # Обрабатываем сообщение
-                response_text = process_user_message(user_id, text)
-                
-                # Отправляем ответ
-                send_message(user_id, response_text)
-                print(f"Ответ отправлен пользователю {user_id}")
-
-        except Exception as error:
-            print(f"Ошибка: {error}")
+            if pending is None:
+                pending = get_updates(marker)
+            delivered = True
+            remaining = []
+            for update in pending["updates"]:
+                try:
+                    if not handle_update(update):
+                        delivered = False
+                        remaining.append(update)
+                except Exception as error:
+                    log.error("Ошибка события: %s", type(error).__name__)
+                    delivered = False
+                    remaining.append(update)
+            if delivered:
+                marker = pending["marker"]
+                pending = None
+            else:
+                # Повторяем полученные события локально: marker=None при новом
+                # запросе может означать только последние обновления на сервере.
+                pending["updates"] = remaining
+                time.sleep(5)
+        except (requests.RequestException, ValueError) as error:
+            log.warning("Ошибка получения обновлений: %s", type(error).__name__)
             time.sleep(5)
 
 

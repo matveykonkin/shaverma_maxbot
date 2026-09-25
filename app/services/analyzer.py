@@ -1,6 +1,7 @@
 import re
 from typing import List, Dict
 from app.utils.data_loader import load_json
+from app.parsing import normalize_text, without_urls, UserInputError
 
 _skills_taxonomy = None
 
@@ -15,6 +16,10 @@ def extract_skills(text: str) -> List[Dict]:
     Извлекает навыки из текста стажировки на основе skills.json.
     Возвращает список словарей: [{"id": "python", "name": "Python", "weight": 0.8}, ...]
     """
+    try:
+        text = without_urls(normalize_text(text))
+    except UserInputError:
+        return []
     taxonomy = get_taxonomy()
     skills_list = taxonomy.get("skills", [])
     
@@ -31,11 +36,8 @@ def extract_skills(text: str) -> List[Dict]:
                 score += 2
                 matched_terms.append(alias)
                 
-        for term in skill.get("contextual_terms", []):
-            pattern = re.escape(term.lower())
-            if re.search(rf"\b{pattern}\b", text_lower):
-                score += 1
-                matched_terms.append(term)
+        # Название платформы или библиотеки само по себе не доказывает навык:
+        # GitHub — не Git, векторная БД — не SQL, FastAPI — не знание REST.
                 
         if score > 0:
             weight = min(score / 10.0, 1.0)
