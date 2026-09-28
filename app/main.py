@@ -5,6 +5,7 @@ import os
 import sys
 import time
 import json
+from collections import OrderedDict
 from pathlib import Path
 from datetime import datetime
 
@@ -14,7 +15,7 @@ from dotenv import load_dotenv
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.parsing import (
-    UserInputError, normalize_text, parse_option, unsupported_direction,
+    UserInputError, parse_option, unsupported_direction,
     valid_user_id, validate_description,
 )
 from app.services.analyzer import extract_skills
@@ -23,7 +24,7 @@ from app.services.scoring import calculate_score, validate_answers
 from app.services.feedback import build_feedback
 from app.database import (
     save_test_session, get_test_session, clear_test_session,
-    save_user_answer, get_user_answers, save_test_result, 
+    save_user_answer, save_test_result, 
     get_test_history, get_user_stats
 )
 
@@ -51,10 +52,16 @@ MAX_CACHED_MESSAGES = 2000
 YES = {"да", "начать", "начать тест", "готов", "готова", "yes"}
 NO = {"нет", "не сейчас", "позже", "no"}
 HELP = (
-    "Пришли текст Python/backend-стажировки с требованиями. "
-    "После подбора теста напиши «да». В тесте отвечай одной латинской буквой или номером варианта.\n"
-    "/start — начало; /help — помощь; /continue — текущий шаг; "
-    "/restart — пройти выбранный тест заново; /cancel — отменить; /result — последний результат."
+    "Пришли текст Python/backend-стажировки с требованиями.\n\n"
+    "После подбора теста напиши «да». В тесте отвечай одной латинской "
+    "буквой или номером варианта.\n\n"
+    "Доступные команды:\n"
+    "/start — начать работу с ботом\n"
+    "/help — показать эту справку\n"
+    "/cancel — отменить текущий тест\n"
+    "/restart — начать тест заново\n"
+    "/stats — посмотреть статистику\n"
+    "/history — посмотреть историю тестов"
 )
 
 
@@ -149,6 +156,9 @@ def analyze_internship(user_id: int, text: str) -> str:
     skill_ids = [skill["id"] for skill in skills]
     if "python" not in skill_ids:
         return "Не найдено требование Python. Сейчас поддерживаются только Python/backend-стажировки."
+
+    skills_text = ", ".join(skill["name"] for skill in skills)
+
     test_data = select_test_questions(skill_ids)
     if "error" in test_data:
         return f"К сожалению, по навыкам ({skills_text}) нет готового теста."
@@ -165,12 +175,15 @@ def analyze_internship(user_id: int, text: str) -> str:
     # Сохраняем сессию в SQLite
     save_test_session(user_id, session_data)
     
-    msg = (
+    first_q = test_data["questions"][0]
+    options_text = "\n".join(f"{o['id']}: {o['text']}" for o in first_q["options"])
+    return (
         f"В стажировке важны навыки: {skills_text}.\n\n"
         f"Я подготовил короткую проверку: {test_data['test_name']} "
         f"(вопросов: {len(test_data['questions'])}).\n\n"
-        "Готов пройти тест?"
+        f"Вопрос 1:\n{first_q['prompt']}\n\n{options_text}"
     )
+
 
 
 def process_user_message(user_id: int, text: str) -> str:
@@ -185,22 +198,35 @@ def process_user_message(user_id: int, text: str) -> str:
         return get_test_history_command(user_id)
     elif text_lower in ["/restart", "перезапуск", "начать заново"]:
         return restart_command(user_id)
+    elif text in {"/help", "помощь"}:
+        return HELP
+    elif text == "/start":
+        return (
+            "Привет! 👋\n\n"
+            "Пришли описание стажировки — я выделю ключевые навыки "
+            "и предложу короткий тест.\n\n"
+            + HELP
+        )
+    elif text in {"/cancel", "отмена"}:
+        clear_test_session(user_id)
+        return "Текущий тест отменён. Можешь прислать новое описание стажировки."
     
     # Проверяем, есть ли активная сессия теста
     session = get_test_session(user_id)
-    
+
     if session and "test_data" in session:
         # Пользователь проходит тест
         return handle_test_response(user_id, text, session)
-    
+
     # Если сессии нет - анализируем как описание стажировки
-    if len(text) < 15:
+    if not text.strip():
         return (
-            f"Привет! Пришли описание стажировки. Я выделю ключевые навыки и проверю твои знания по ним коротким тестом.\n\n"
+            f"Привет! Пришли описание стажировки. Я выделю ключевые навыки "
+            f"и проверю твои знания по ним коротким тестом.\n\n"
             f"Навыки, по которым доступны тесты: {SKILLS_LIST_TEXT}.\n\n"
-            f"Описание должно быть длиннее 15 символов, а также содержать названия конкретных навыков (например, SQL, Python, Git)\n\n"
-            f"Пример описания: Требуется Python, знание SQL, работа с Git.")
-    
+            f"Пример описания: Требуется Python, знание SQL, работа с Git."
+        )
+
     return analyze_internship(user_id, text)
 
 
@@ -217,106 +243,102 @@ def handle_test_response(user_id: int, text: str, session: dict) -> str:
     
     # Проверяем, что пользователь выбрал вариант ответа
     try:
-        selected_option_id = text.strip().lower()
-        # Ищем подходящий вариант
-        option = next(
-            (opt for opt in current_question["options"] 
-             if opt["id"].lower() == selected_option_id),
-            None
+        selected_option_id = parse_option(
+            text,
+            current_question["options"],
+        )
+    except UserInputError as error:
+        return f"⚠️ {error}"
+
+    option = next(
+        opt
+        for opt in current_question["options"]
+        if opt["id"] == selected_option_id
+    )
+        
+    is_correct = option["id"] == current_question["correct_option_id"]
+        
+    # СОХРЯНЯЕМ ОТВЕТ В SQLite
+    answer_data = {
+        "question_id": current_question["id"],
+        "question_text": current_question["prompt"],
+        "selected_option_id": option["id"],
+        "selected_option_text": option["text"],
+        "is_correct": is_correct,
+        "correct_option_id": current_question["correct_option_id"],
+        "skill_id": current_question.get("skill_id", "unknown")
+    }
+    save_user_answer(user_id, current_question["id"], answer_data)
+        
+    # Обновляем сессию в памяти
+    session["answers"].append({
+        "question_id": current_question["id"],
+        "selected_option_id": option["id"],
+        "selected_option_text": option["text"],
+        "is_correct": is_correct
+    })
+    session["current_question"] += 1
+        
+    # Обновляем сессию в SQLite
+    save_test_session(user_id, session)
+        
+    total_questions = len(questions)
+    passed_questions = session["current_question"]
+    remaining_questions = total_questions - passed_questions
+    progress_text = f"Прогресс: {passed_questions}/{total_questions} (осталось {remaining_questions})"
+        
+    if session["current_question"] < total_questions:
+        next_q = questions[session["current_question"]]
+        options_text = "\n".join([
+            f"{opt['id']}: {opt['text']}" 
+            for opt in next_q["options"]
+        ])
+        return (
+            f"{progress_text}\n\n"
+            f"Следующий вопрос:\n{next_q['prompt']}\n\n"
+            f"{options_text}"
+        )
+    else:
+        # Завершаем тест
+        result = calculate_score(session["answers"], questions)
+        
+        # СОХРЯНЯЕМ РЕЗУЛЬТАТ ТЕСТА в SQLite
+        test_result = {
+            "test_id": test_data["test_id"],
+            "test_name": test_data["test_name"],
+            "total_score": result["total_score"],
+            "overall_percent": result["overall_percent"],
+            "skill_scores": result["skill_scores"],
+            "is_ready": result["is_ready"],
+            "questions_count": len(questions)
+        }
+        save_test_result(user_id, test_result)
+        
+        # Формируем фидбэк
+        feedback = build_feedback(
+            wrong_ids=result["wrong_question_ids"],
+            questions=questions,
+            user_answers=session["answers"]
         )
         
-        if not option:
-            # Показываем доступные варианты
-            options_text = "\n".join([
-                f"{opt['id']}: {opt['text']}" 
-                for opt in current_question["options"]
-            ])
-            return f"Выбери вариант:\n{options_text}"
+        status = "✅ Готов к отклику" if result["is_ready"] else "⚠️ Нужно подтянуть"
         
-        is_correct = option["id"] == current_question["correct_option_id"]
-        
-        # СОХРЯНЯЕМ ОТВЕТ В SQLite
-        answer_data = {
-            "question_id": current_question["id"],
-            "question_text": current_question["prompt"],
-            "selected_option_id": option["id"],
-            "selected_option_text": option["text"],
-            "is_correct": is_correct,
-            "correct_option_id": current_question["correct_option_id"],
-            "skill_id": current_question.get("skill_id", "unknown")
-        }
-        save_user_answer(user_id, current_question["id"], answer_data)
-        
-        # Обновляем сессию в памяти
-        session["answers"].append({
-            "question_id": current_question["id"],
-            "selected_option_id": option["id"],
-            "is_correct": is_correct
-        })
-        session["current_question"] += 1
-        
-        # Обновляем сессию в SQLite
-        save_test_session(user_id, session)
-        
-        total_questions = len(questions)
-        passed_questions = session["current_question"]
-        remaining_questions = total_questions - passed_questions
-        progress_text = f"Прогресс: {passed_questions}/{total_questions} (осталось {remaining_questions})"
-        
-        if session["current_question"] < total_questions:
-            next_q = questions[session["current_question"]]
-            options_text = "\n".join([
-                f"{opt['id']}: {opt['text']}" 
-                for opt in next_q["options"]
-            ])
-            return (
-                f"{progress_text}\n\n"
-                f"Следующий вопрос:\n{next_q['prompt']}\n\n"
-                f"{options_text}"
+        final_msg = (
+            f"Тест завершен! 🎉\n\n"
+            f"Пройдено: {total_questions}/{total_questions} вопросов.\n\n"
+            f"Общий результат: {result['total_score']} ({result['overall_percent']}%)\n\n"
+            f"По навыкам:\n" + 
+            "\n".join([
+                f"- {skill}: {score}%" 
+                for skill, score in result["skill_scores"].items()
+            ]) +
+            f"\n\n{status}\n\n{feedback}"
             )
-        else:
-            # Завершаем тест
-            result = calculate_score(session["answers"], questions)
+        
+        # Удаляем активную сессию
+        clear_test_session(user_id)
+        return final_msg
             
-            # СОХРЯНЯЕМ РЕЗУЛЬТАТ ТЕСТА в SQLite
-            test_result = {
-                "test_id": test_data["test_id"],
-                "test_name": test_data["test_name"],
-                "total_score": result["total_score"],
-                "overall_percent": result["overall_percent"],
-                "skill_scores": result["skill_scores"],
-                "is_ready": result["is_ready"],
-                "questions_count": len(questions)
-            }
-            save_test_result(user_id, test_result)
-            
-            # Формируем фидбэк
-            feedback = build_feedback(
-                wrong_ids=result["wrong_question_ids"],
-                questions=questions,
-                user_answers=session["answers"]
-            )
-            
-            status = "✅ Готов к отклику" if result["is_ready"] else "⚠️ Нужно подтянуть"
-            
-            final_msg = (
-                f"Тест завершен! 🎉\n\n"
-                f"Пройдено: {total_questions}/{total_questions} вопросов.\n\n"
-                f"Общий результат: {result['total_score']} ({result['overall_percent']}%)\n\n"
-                f"По навыкам:\n" + 
-                "\n".join([
-                    f"- {skill}: {score}%" 
-                    for skill, score in result["skill_scores"].items()
-                ]) +
-                f"\n\n{status}\n\n{feedback}"
-            )
-            
-            # Удаляем активную сессию
-            clear_test_session(user_id)
-            return final_msg
-            
-    except Exception as e:
-        return f"Ошибка при обработке ответа: {e}"
 
 def get_user_stats_command(user_id: int) -> str:
     """Команда для просмотра статистики."""
@@ -366,6 +388,95 @@ def restart_command(user_id: int) -> str:
         "Перезапуск completed. 🔄\n\n"
         "Чтобы начать заново, пришли новое описание стажировки."
     )
+
+def handle_update(update) -> bool:
+    """Возвращает True, если событие обработано и его можно подтвердить."""
+    if not isinstance(update, dict) or update.get("update_type") != "message_created":
+        return True
+    message = update.get("message")
+    if not isinstance(message, dict):
+        return True
+
+    sender = message.get("sender") or {}
+    recipient = message.get("recipient") or {}
+    body = message.get("body") or {}
+    user_id = sender.get("user_id")
+
+    # Игнорируем ботов, групповые чаты и события без нормального user_id
+    if sender.get("is_bot") or recipient.get("chat_type") != "dialog" or not valid_user_id(user_id):
+        return True
+
+    mid = body.get("mid")
+
+    if mid:
+        message_key = (user_id, mid)
+
+        cached_message = _processed_messages.get(message_key)
+
+        if cached_message is not None:
+            parts = cached_message["parts"]
+            next_part = cached_message["next_part"]
+
+            for index in range(next_part, len(parts)):
+                send_message(user_id, parts[index])
+                cached_message["next_part"] = index + 1
+
+            cached_message["done"] = True
+            return True
+
+    text = body.get("text")
+    log.info("Получено сообщение от %s", user_id)
+
+    if not isinstance(text, str) or not text.strip():
+        reply = "Пришли обычный текст. Фото, файлы и стикеры пока не читаю."
+    else:
+        try:
+            reply = process_user_message(user_id, text)
+        except UserInputError as error:
+            reply = str(error)
+        except Exception:
+            log.exception("Ошибка обработки сообщения")
+            reply = "Что-то пошло не так. Попробуй ещё раз или отправь /restart."
+
+    if not reply:
+        reply = "Не удалось сформировать ответ. Попробуй ещё раз."
+
+    parts = [
+        reply[i:i + 4000]
+        for i in range(0, len(reply), 4000)]
+
+    if mid:
+        _processed_messages[message_key] = {
+            "parts": parts,
+            "next_part": 0,
+            "done": False,
+        }
+        _processed_messages.move_to_end(message_key)
+
+    try:
+        for index, part in enumerate(parts):
+            send_message(user_id, part)
+
+            if mid:
+                _processed_messages[message_key]["next_part"] = index + 1
+
+    except requests.RequestException as error:
+        log.warning("Не удалось отправить ответ: %s", type(error).__name__)
+        return False
+
+    if mid:
+        _processed_messages[message_key]["done"] = True
+
+        while len(_processed_messages) > MAX_CACHED_MESSAGES:
+            key, cached = next(iter(_processed_messages.items()))
+
+            if not cached.get("done"):
+                break
+
+            _processed_messages.pop(key)
+
+    log.info("Ответ отправлен пользователю %s", user_id)
+    return True
 
 
 def main():
