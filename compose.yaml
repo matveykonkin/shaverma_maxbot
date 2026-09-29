@@ -3,4 +3,9 @@ services:
     build: .
     env_file:
       - .env
+    volumes:
+      - ./data:/app/data
+    network_mode: host
+    environment:
+      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
     restart: unless-stopped
