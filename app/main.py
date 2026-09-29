@@ -390,6 +390,7 @@ def restart_command(user_id: int) -> str:
     )
 
 def handle_update(update) -> bool:
+    log.info("RAW UPDATE (DEBUG): %s", update)  # TODO: убрать после диагностики дублей
     """Возвращает True, если событие обработано и его можно подтвердить."""
     if not isinstance(update, dict) or update.get("update_type") != "message_created":
         return True
@@ -490,6 +491,7 @@ def main():
         try:
             if pending is None:
                 pending = get_updates(marker)
+                log.info("Получено %d событий, marker=%s (DEBUG)", len(pending["updates"]), pending["marker"])  # TODO: убрать
             delivered = True
             remaining = []
             for update in pending["updates"]:
