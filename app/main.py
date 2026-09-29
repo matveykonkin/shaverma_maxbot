@@ -5,6 +5,7 @@ import os
 import sys
 import time
 import json
+import signal
 from collections import OrderedDict
 from pathlib import Path
 from datetime import datetime
@@ -43,6 +44,13 @@ BASE_URL = os.getenv("BASE_URL", "https://platform-api2.max.ru")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 HEADERS = {"Authorization": BOT_TOKEN}
 log = logging.getLogger(__name__)
+
+_shutdown = False
+
+def _handle_shutdown(signum, frame):
+    global _shutdown
+    _shutdown = True
+    log.info("Получен сигнал остановки, завершаю polling")
 
 # Сохраняем принятую архитектуру: один процесс, последовательный polling, память.
 user_sessions = {}
@@ -390,7 +398,6 @@ def restart_command(user_id: int) -> str:
     )
 
 def handle_update(update) -> bool:
-    log.info("RAW UPDATE (DEBUG): %s", update)  # TODO: убрать после диагностики дублей
     """Возвращает True, если событие обработано и его можно подтвердить."""
     if not isinstance(update, dict) or update.get("update_type") != "message_created":
         return True
@@ -484,14 +491,15 @@ def main():
     if not BOT_TOKEN:
         raise RuntimeError("BOT_TOKEN не найден в .env")
     logging.basicConfig(level=logging.INFO)
+    signal.signal(signal.SIGTERM, _handle_shutdown)
+    signal.signal(signal.SIGINT, _handle_shutdown)
     log.info("MAX-бот запущен")
     marker = None
     pending = None
-    while True:
+    while not _shutdown:
         try:
             if pending is None:
                 pending = get_updates(marker)
-                log.info("Получено %d событий, marker=%s (DEBUG)", len(pending["updates"]), pending["marker"])  # TODO: убрать
             delivered = True
             remaining = []
             for update in pending["updates"]:
