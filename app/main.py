@@ -594,24 +594,27 @@ def handle_callback(update):
     session = get_test_session(user_id)
 
     if not session or "test_data" not in session:
+        log.warning("Callback без активной сессии пользователя %s", user_id)
+
         try:
             answer_callback(
                 callback_id,
-                "Активного теста нет. Пришли новое описание стажировки.",
+                "Этот тест уже завершён. Пришли новое описание стажировки.",
             )
         except requests.RequestException:
             return False
+
         return True
 
     try:
-        text = handle_test_response(
+        # Используем существующую рабочую логику теста.
+        reply = handle_test_response(
             user_id,
             selected_id,
             session,
         )
 
-        # handle_test_response() либо сохранил следующую позицию,
-        # либо удалил завершённую сессию.
+        # Если тест ещё идёт — показываем следующий вопрос с кнопками.
         updated_session = get_test_session(user_id)
 
         if (
@@ -622,18 +625,20 @@ def handle_callback(update):
         ):
             attachments = [question_keyboard(updated_session)]
         else:
+            # Тест завершён: handle_test_response()
+            # уже сформировал статистику и фидбек.
             attachments = []
 
         answer_callback(
             callback_id,
-            text,
+            reply,
             attachments=attachments,
         )
 
-    except requests.RequestException:
+    except requests.RequestException as error:
         log.warning(
             "Не удалось обработать callback: %s",
-            "requests error",
+            type(error).__name__,
         )
         return False
 
