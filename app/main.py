@@ -74,7 +74,7 @@ HELP = (
 
 
 def get_updates(marker=None):
-    params = {"timeout": 30, "types": "message_created"}
+    params = {"timeout": 30, "types": "message_created,message_callback"}
     if marker is not None:
         params["marker"] = marker
     response = requests.get(f"{BASE_URL}/updates", headers=HEADERS, params=params, timeout=40)
@@ -88,22 +88,82 @@ def get_updates(marker=None):
     return {"updates": data["updates"], "marker": new_marker}
 
 
-def send_message(user_id, text):
-    if not valid_user_id(user_id) or not isinstance(text, str) or not text.strip() or len(text) > 4000:
+def send_message(user_id, text, attachments=None):
+    if (
+        not valid_user_id(user_id)
+        or not isinstance(text, str)
+        or not text.strip()
+        or len(text) > 4000
+    ):
         raise ValueError("Некорректное исходящее сообщение")
-    delay = 0.55 - (time.monotonic() - _send_times.get(user_id, float("-inf")))
+
+    delay = 0.55 - (
+        time.monotonic() - _send_times.get(user_id, float("-inf"))
+    )
     if delay > 0:
         time.sleep(delay)
+
     _send_times[user_id] = time.monotonic()
     _send_times.move_to_end(user_id)
+
     if len(_send_times) > MAX_CACHED_MESSAGES:
         _send_times.popitem(last=False)
+
     response = requests.post(
-        f"{BASE_URL}/messages", headers=HEADERS, params={"user_id": user_id},
-        json={"text": text}, timeout=10,
+        f"{BASE_URL}/messages",
+        headers=HEADERS,
+        params={"user_id": user_id},
+        json={
+            "text": text,
+            "attachments": attachments or [],
+        },
+        timeout=10,
     )
     response.raise_for_status()
     return response
+
+def answer_callback(callback_id, text, attachments=None):
+    if not isinstance(callback_id, str) or not callback_id.strip():
+        raise ValueError("Некорректный callback_id")
+    if not isinstance(text, str) or not text.strip() or len(text) > 4000:
+        raise ValueError("Некорректный текст callback-ответа")
+
+    response = requests.post(
+        f"{BASE_URL}/answers",
+        headers=HEADERS,
+        params={"callback_id": callback_id},
+        json={
+            "message": {
+                "text": text,
+                "attachments": attachments or [],
+            }
+        },
+        timeout=10,
+    )
+    response.raise_for_status()
+    return response
+
+def build_keyboard(button_rows):
+    return {
+        "type": "inline_keyboard",
+        "payload": {
+            "buttons": button_rows
+        }
+    }
+
+
+def question_keyboard(session):
+    question = session["test_data"]["questions"][session["current_question"]]
+    buttons = []
+
+    for option in question["options"]:
+        buttons.append({
+            "type": "callback",
+            "text": option["id"].upper(),
+            "payload": f"answer:{option['id']}",
+        })
+
+    return build_keyboard([buttons])
 
 
 def _question_text(session):
@@ -146,9 +206,12 @@ def _current_step(session):
     if session["stage"] == "in_progress":
         return _question_text(session)
     if session["stage"] == "awaiting_confirmation":
-        return "Тест подготовлен. Напиши «да», чтобы начать, или «не сейчас»."
+        return (
+            "Тест подготовлен. "
+            "Выбери действие ниже."
+        )
     if session["stage"] == "restart_confirmation":
-        return "Начать выбранный тест заново и очистить его ответы? Напиши «да» или «нет»."
+        return "Начать выбранный тест заново и очистить его ответы?"
     return session["result_text"]
 
 
@@ -345,8 +408,7 @@ def handle_test_response(user_id: int, text: str, session: dict) -> str:
         
         # Удаляем активную сессию
         clear_test_session(user_id)
-        return final_msg
-            
+        return final_msg          
 
 def get_user_stats_command(user_id: int) -> str:
     """Команда для просмотра статистики."""
@@ -398,9 +460,18 @@ def restart_command(user_id: int) -> str:
     )
 
 def handle_update(update) -> bool:
-    """Возвращает True, если событие обработано и его можно подтвердить."""
-    if not isinstance(update, dict) or update.get("update_type") != "message_created":
+    """True: событие обработано/неподдерживаемое; False: доставку нужно повторить."""
+    if not isinstance(update, dict):
         return True
+
+    update_type = update.get("update_type")
+
+    if update_type == "message_callback":
+        return handle_callback(update)
+
+    if update_type != "message_created":
+        return True
+
     message = update.get("message")
     if not isinstance(message, dict):
         return True
@@ -453,6 +524,13 @@ def handle_update(update) -> bool:
         reply[i:i + 4000]
         for i in range(0, len(reply), 4000)]
 
+    session = get_test_session(user_id)
+    attachments = []
+
+    if session and "test_data" in session:
+        if session["current_question"] < len(session["test_data"]["questions"]):
+            attachments = [question_keyboard(session)]
+
     if mid:
         _processed_messages[message_key] = {
             "parts": parts,
@@ -463,7 +541,11 @@ def handle_update(update) -> bool:
 
     try:
         for index, part in enumerate(parts):
-            send_message(user_id, part)
+            send_message(
+                user_id,
+                part,
+                attachments=attachments if index == 0 else [],
+            )
 
             if mid:
                 _processed_messages[message_key]["next_part"] = index + 1
@@ -486,6 +568,80 @@ def handle_update(update) -> bool:
     log.info("Ответ отправлен пользователю %s", user_id)
     return True
 
+def handle_callback(update):
+    callback = update.get("callback") or {}
+
+    user = callback.get("user") or {}
+    user_id = user.get("user_id")
+
+    callback_id = callback.get("callback_id")
+    payload = callback.get("payload")
+
+    if not valid_user_id(user_id):
+        return True
+
+    if not isinstance(callback_id, str) or not callback_id.strip():
+        return True
+
+    if not isinstance(payload, str):
+        return True
+
+    if not payload.startswith("answer:"):
+        return True
+
+    selected_id = payload.removeprefix("answer:")
+
+    session = get_test_session(user_id)
+
+    if not session or "test_data" not in session:
+        try:
+            answer_callback(
+                callback_id,
+                "Активного теста нет. Пришли новое описание стажировки.",
+            )
+        except requests.RequestException:
+            return False
+        return True
+
+    try:
+        text = handle_test_response(
+            user_id,
+            selected_id,
+            session,
+        )
+
+        # handle_test_response() либо сохранил следующую позицию,
+        # либо удалил завершённую сессию.
+        updated_session = get_test_session(user_id)
+
+        if (
+            updated_session
+            and "test_data" in updated_session
+            and updated_session["current_question"]
+            < len(updated_session["test_data"]["questions"])
+        ):
+            attachments = [question_keyboard(updated_session)]
+        else:
+            attachments = []
+
+        answer_callback(
+            callback_id,
+            text,
+            attachments=attachments,
+        )
+
+    except requests.RequestException:
+        log.warning(
+            "Не удалось обработать callback: %s",
+            "requests error",
+        )
+        return False
+
+    except Exception:
+        log.exception("Ошибка обработки callback")
+        return True
+
+    return True
 
 def main():
     if not BOT_TOKEN:
